@@ -1,13 +1,9 @@
 language: groovy
 
 sudo: false
-# addons:
-#   apt:
-#     packages:
-#       - oracle-java8-installer
 
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 install: true
 
@@ -23,7 +19,7 @@ env:
 script:
   - ./gradlew getGit -Pcomponent=example
   - ./gradlew load
-  - ./gradlew runtime/component/example:test --info
+  - ./gradlew runtime:component:example:test --info
 
 cache:
   directories:

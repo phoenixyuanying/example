@@ -14,7 +14,7 @@
 
 apply plugin: 'groovy'
 
-version = '2.0.0'
+version = '2.1.3'
 sourceCompatibility = '1.8'
 def moquiDir = file(projectDir.absolutePath + '/../../..')
 def frameworkDir = file(moquiDir.absolutePath + '/framework')
@@ -25,18 +25,23 @@ repositories {
     jcenter()
 }
 
+// Log4J has annotation processors, disable to avoid warning
+tasks.withType(JavaCompile) { options.compilerArgs << "-proc:none" }
+tasks.withType(GroovyCompile) { options.compilerArgs << "-proc:none" }
+
 dependencies {
     compile project(':framework')
     testCompile project(':framework').configurations.testCompile.allDependencies
 }
 
 // by default the Java plugin runs test on build, change to not do that (only run test if explicit task)
-check.dependsOn.remove(test)
+// no longer workds as of gradle 4.8 or possibly earlier, use clear() instead: check.dependsOn.remove(test)
+check.dependsOn.clear()
 
 jar {
-    destinationDir = file(projectDir.absolutePath + '/lib')
+    destinationDirectory = file(projectDir.absolutePath + '/lib')
     // this is required to change from the default that includes the path to this module (ie 'runtime/component/example')
-    baseName = 'example'
+    archiveBaseName = 'example'
 }
 task cleanLib(type: Delete) { delete file(jar.archivePath) }
 clean.dependsOn cleanLib
@@ -52,7 +57,7 @@ test {
 
     testLogging.showStandardStreams = true
 
-    classpath += files(sourceSets.main.output.classesDir)
+    classpath += files(sourceSets.main.output.classesDirs)
     // filter out classpath entries that don't exist (gradle adds a bunch of these), or ElasticSearch JarHell will blow up
     classpath = classpath.filter { it.exists() }
 
